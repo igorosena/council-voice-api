@@ -24,6 +24,7 @@ class Voice:
     prompt: str         # path relative to DATA_DIR
     ref_seconds: float
     cleaned: bool = False
+    clean_error: Optional[str] = None
 
     @property
     def ref_audio_path(self) -> Path:

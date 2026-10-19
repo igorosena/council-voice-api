@@ -117,7 +117,7 @@ async def create_voice(
                 f"reference clip is {seconds:.1f}s; trim it to at most "
                 f"{config.MAX_REF_SECONDS:.0f}s so it matches ref_text",
             )
-        cleaned = await asyncio.to_thread(engine.clean_reference, wav_path)
+        cleaned, clean_error = await asyncio.to_thread(engine.clean_reference, wav_path)
         await asyncio.to_thread(engine.encode_prompt, wav_path, ref_text, prompt_path)
     finally:
         tmp_upload.unlink(missing_ok=True)
@@ -131,6 +131,7 @@ async def create_voice(
         prompt=str(prompt_path.relative_to(config.DATA_DIR)),
         ref_seconds=round(seconds, 2),
         cleaned=cleaned,
+        clean_error=clean_error,
     )
     voices.upsert(voice)
     logger.info("registered voice %s (%.1fs ref, cleaned=%s)", voice_id, seconds, cleaned)

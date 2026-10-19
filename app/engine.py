@@ -116,14 +116,14 @@ def convert_to_wav(src: Path, dst: Path) -> None:
     )
 
 
-def clean_reference(wav_path: Path) -> bool:
+def clean_reference(wav_path: Path) -> tuple[bool, Optional[str]]:
     """Denoise + dereverb ``wav_path`` in place with DeepFilterNet.
 
-    Returns True when the clip was cleaned, False when cleaning is disabled or
-    DeepFilterNet is unavailable (the original clip is kept in that case).
+    Returns ``(True, None)`` when the clip was cleaned, or ``(False, reason)``
+    when cleaning is disabled or failed (the original clip is kept).
     """
     if not config.CLEAN_REFS:
-        return False
+        return False, "disabled (COUNCIL_CLEAN_REFS=0)"
     import sys
 
     python = config.DFN_PYTHON or sys.executable
@@ -135,11 +135,15 @@ def clean_reference(wav_path: Path) -> bool:
             capture_output=True, text=True, timeout=300,
         )
         if proc.returncode != 0:
-            logger.warning("DeepFilterNet failed, keeping raw reference: %s",
-                           proc.stderr.strip().splitlines()[-1:] or proc.returncode)
-            return False
+            tail = [l for l in proc.stderr.strip().splitlines() if l.strip()][-3:]
+            reason = " | ".join(tail) or f"exit code {proc.returncode}"
+            logger.warning("DeepFilterNet failed, keeping raw reference: %s", reason)
+            return False, reason[:500]
         convert_to_wav(tmp48, wav_path)
-        return True
+        return True, None
+    except Exception as e:  # timeout, missing interpreter, ffmpeg failure
+        logger.warning("DeepFilterNet failed, keeping raw reference: %s", e)
+        return False, str(e)[:500]
     finally:
         tmp48.unlink(missing_ok=True)
 

@@ -63,6 +63,8 @@ def main() -> int:
         body, ctype = multipart(fields, "ref_audio", clips[0])
         req = urllib.request.Request(f"{args.url.rstrip('/')}/voices", data=body, method="POST")
         req.add_header("Content-Type", ctype)
+        # RunPod's Cloudflare proxy rejects urllib's default User-Agent (403 / error 1010).
+        req.add_header("User-Agent", "council-voice-client/1.0")
         if args.key:
             req.add_header("Authorization", f"Bearer {args.key}")
         try:
