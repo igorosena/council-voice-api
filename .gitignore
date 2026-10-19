@@ -1,0 +1,9 @@
+data/
+.env
+.venv/
+__pycache__/
+*.pyc
+voices_src/
+samples/
+.venv-tools/
+exemplo-teste.mp3

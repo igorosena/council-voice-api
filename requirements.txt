@@ -1,0 +1,17 @@
+# Model stack (torch is installed separately: see Dockerfile / README for the
+# CUDA vs CPU vs Apple Silicon wheel choice).
+torch>=2.4
+torchaudio>=2.4
+transformers>=5.10.0
+accelerate
+huggingface_hub
+numpy
+soundfile
+pydub
+# Reference-clip cleanup (needs torch 2.8.x; see Dockerfile pin)
+deepfilternet
+# API
+fastapi>=0.115,<0.137
+uvicorn[standard]>=0.30
+python-multipart
+pydantic>=2

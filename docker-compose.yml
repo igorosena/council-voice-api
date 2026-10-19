@@ -1,0 +1,22 @@
+services:
+  council-voice:
+    build: .
+    image: council-voice-api:latest
+    container_name: council-voice
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8000:8000"   # keep loopback; put Caddy/Nginx with TLS in front
+    volumes:
+      - council-data:/data      # voices, prompts and the HF model cache
+    # Remove this block to run CPU-only.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  council-data:
